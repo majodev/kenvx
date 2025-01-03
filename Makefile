@@ -2,6 +2,11 @@
 # --- Building & Testing
 ### -----------------------
 
+.PHONY: all
+all:
+	$(MAKE) build
+	$(MAKE) test
+
 .PHONY: build
 build: format lint
 
@@ -12,15 +17,15 @@ info:
 
 .PHONY: format
 format:
-	@shellharden --replace *.sh
-	@shellharden --replace **/*.sh
+	@shellharden --replace kenvx
+	@shellharden --replace kenvx.bats
 
 .PHONY: lint
 lint:
-	@shellcheck -x *.sh
-	@shellcheck -x **/*.sh
-	@shellharden --check *.sh
-	@shellharden --check **/*.sh
+	@shellcheck -x kenvx
+	@shellcheck -x kenvx.bats
+	@shellharden --check kenvx
+	@shellharden --check kenvx.bats
 
 .PHONY: test
 test:

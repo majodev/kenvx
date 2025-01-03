@@ -45,11 +45,11 @@ trap 'rm -f "$TMP_ENV_FILE"' EXIT
 
 # Extract environment variables using kubectl set env
 kubectl set env "${KUBECTL_ARGS[@]}" --resolve --list --overwrite=true --dry-run='client' \
-    | grep -v '^#' \
+    | (grep -v '^#' || true) \
     > "$TMP_ENV_FILE"
 
-# Get all containers (regular and init) with their envFrom references
-CONTAINERS_JSON=$(kubectl get "${KUBECTL_ARGS[0]}" -o json | \
+# # Get all containers (regular and init) with their envFrom references
+if CONTAINERS_JSON=$(kubectl get "${KUBECTL_ARGS[0]}" -o json | \
     jq -r '
     # First, determine the path to containers based on resource type
     (if .spec.jobTemplate then
@@ -63,10 +63,9 @@ CONTAINERS_JSON=$(kubectl get "${KUBECTL_ARGS[0]}" -o json | \
     {
         containers: ($spec.containers // []),
         initContainers: ($spec.initContainers // [])
-    }')
+    }') && [ "$CONTAINERS_JSON" != "" ]; then
 
-# Check if we got valid JSON before proceeding
-if [ $? -eq 0 ] && [ "$CONTAINERS_JSON" != "" ]; then
+
     # Process both container types
     echo "$CONTAINERS_JSON" | \
     jq -r '
@@ -98,9 +97,6 @@ if [ $? -eq 0 ] && [ "$CONTAINERS_JSON" != "" ]; then
     done >> "$TMP_ENV_FILE"
 fi
 
-# # Sort and deduplicate all environment variables
-# sort -u "$TMP_ENV_FILE" -o "$TMP_ENV_FILE"
-
 # If no command is provided, just print the environment variables
 if [ ${#COMMAND_AND_ARGS[@]} -eq 0 ]; then
     cat "$TMP_ENV_FILE"
@@ -118,7 +114,7 @@ trap 'rm -f "$TEMP_SCRIPT" "$TMP_ENV_FILE"' EXIT
     
     while IFS= read -r line; do
         if [[ $line =~ ^([^=]+)=(.*) ]]; then
-            if [ -n "$current_key" ]; then
+            if [ "$current_key" != "" ]; then
                 # Escape single quotes and backslashes
                 escaped_value=$(printf '%s' "$current_value" | sed "s/'/'\\\\''/g")
                 printf "export %s=$'%s'\n" "$current_key" "$escaped_value"
@@ -131,7 +127,7 @@ trap 'rm -f "$TEMP_SCRIPT" "$TMP_ENV_FILE"' EXIT
     done < "$TMP_ENV_FILE"
     
     # Handle last entry
-    if [ -n "$current_key" ]; then
+    if [ "$current_key" != "" ]; then
         escaped_value=$(printf '%s' "$current_value" | sed "s/'/'\\\\''/g")
         printf "export %s=$'%s'\n" "$current_key" "$escaped_value"
     fi
@@ -140,5 +136,6 @@ trap 'rm -f "$TEMP_SCRIPT" "$TMP_ENV_FILE"' EXIT
 # cat $TEMP_SCRIPT >&3
 
 # Source exports and run command
+# shellcheck source=/dev/null
 source "$TEMP_SCRIPT"
 exec "${COMMAND_AND_ARGS[@]}"
