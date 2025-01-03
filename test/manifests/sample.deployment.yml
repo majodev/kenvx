@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sample
+  template:
+    metadata:
+      labels:
+        app: sample
+    spec:
+      containers:
+      - name: pause-container
+        image: k8s.gcr.io/pause:3.9
+        env:
+        - name: SAMPLE_SINGLE
+          value: "Simple string"
+        - name: SAMPLE_MULTI
+          value: "Multi line\nvalue"
+        - name: SAMPLE_CONFIGMAP
+          valueFrom:
+            configMapKeyRef:
+              name: sample
+              key: sample
