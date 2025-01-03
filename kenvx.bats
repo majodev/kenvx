@@ -13,6 +13,8 @@ SAMPLE_SINGLE=Simple string
 SAMPLE_MULTI=Multi line
 value
 SAMPLE_CONFIGMAP=via config map
+SAMPLE_SECRET=via secret
+SAMPLE_SECRET_64=via secret
 EOF
 )
   # echo "${output}" >&3
@@ -36,4 +38,14 @@ value" ]
   [ "${status}" -eq 0 ]
   # echo "${output}" >&3
   [ "$output" = "via config map" ]
+
+  run kenvx deployment/sample -- sh -c 'echo "$SAMPLE_SECRET"'
+  [ "${status}" -eq 0 ]
+  # echo "${output}" >&3
+  [ "$output" = "via secret" ]
+
+  run kenvx deployment/sample -- sh -c 'echo "$SAMPLE_SECRET_64"'
+  [ "${status}" -eq 0 ]
+  # echo "${output}" >&3
+  [ "$output" = "via secret" ]
 }

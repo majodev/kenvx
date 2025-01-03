@@ -26,3 +26,13 @@ spec:
             configMapKeyRef:
               name: sample
               key: sample
+        - name: SAMPLE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: sample
+              key: sample
+        - name: SAMPLE_SECRET_64
+          valueFrom:
+            secretKeyRef:
+              name: sample-64
+              key: sample

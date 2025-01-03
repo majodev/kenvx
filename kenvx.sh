@@ -108,10 +108,6 @@ if [ ${#COMMAND_AND_ARGS[@]} -eq 0 ]; then
 fi
 
 # Otherwise execute the command with the extracted environment variables
-# Convert newlines to null characters and use xargs -0 to properly handle env vars
-# env -v "$(cat "$TMP_ENV_FILE")" "${COMMAND_AND_ARGS[@]}"
-# tr '\n' '\0' < "$TMP_ENV_FILE" | xargs -0 env "${COMMAND_AND_ARGS[@]}"
-
 TEMP_SCRIPT=$(mktemp)
 trap 'rm -f "$TEMP_SCRIPT" "$TMP_ENV_FILE"' EXIT
 
