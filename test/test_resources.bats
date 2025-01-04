@@ -4,54 +4,6 @@ kenvx() {
   bash "$PROJECT_ROOT_DIR"/kenvx "$@"
 }
 
-@test "fails on missing arguments" {
-  run kenvx
-  # echo "${output}" >&3
-  [ "$status" -eq 1 ]
-}
-
-@test "fails on invalid resource kind" {
-  run kenvx invalid/app
-  # echo "${output}" >&3
-  [ "$status" -eq 1 ]
-  [ "$output" = "error: the server doesn't have a resource type \"invalid\"" ]
-}
-
-@test "fails on invalid resource name" {
-  run kenvx deployment/notfound
-  # echo "${output}" >&3
-  [ "$status" -eq 1 ]
-  [ "$output" = "Error from server (NotFound): deployments.apps \"notfound\" not found" ]
-}
-
-@test "deployment/noenv: prints ENV (nothing)" {
-  run kenvx deployment/noenv
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "" ]
-}
-
-@test "deployment/noenv: exec with ENV" {
-  run kenvx deployment/noenv -- sh -c 'echo exec'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "exec" ]
-}
-
-@test "deployment/emptyenv: prints ENV (nothing)" {
-  run kenvx deployment/emptyenv
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "" ]
-}
-
-@test "deployment/emptyenv: exec with ENV" {
-  run kenvx deployment/emptyenv -- sh -c 'echo exec'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "exec" ]
-}
-
 EXPECTED_PRINT_OUTPUT=$(cat <<EOF
 SAMPLE_SINGLE=Simple string
 SAMPLE_MULTI=Multi line
@@ -139,5 +91,19 @@ EXEC_PRINTF='printf "%s\n" \
   run kenvx daemonset/sample -- sh -c "$EXEC_PRINTF"
   [ "$status" -eq 0 ]
   # echo "${output}" >&3
+  [ "$output" = "$EXPECTED_EXEC_OUTPUT" ]
+}
+
+@test "pod/sample: prints ENV" {
+  run kenvx "$(kubectl get pods -n default -lapp=sample -o name | head -n 1)"
+  [ "$status" -eq 0 ]
+  # echo "${output}" >&3
+  [ "$output" = "$EXPECTED_PRINT_OUTPUT" ]
+}
+
+@test "pod/sample: exec with ENV" {
+  run kenvx "$(kubectl get pods -n default -lapp=sample -o name | head -n 1)" -- sh -c "$EXEC_PRINTF"
+  [ "$status" -eq 0 ]
+  # echo "$output" >&3
   [ "$output" = "$EXPECTED_EXEC_OUTPUT" ]
 }

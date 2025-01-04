@@ -18,18 +18,18 @@ info:
 .PHONY: format
 format:
 	@shellharden --replace kenvx
-	@shellharden --replace kenvx.bats
+	@shellharden --replace test/*.bats
 
 .PHONY: lint
 lint:
 	@shellcheck -x kenvx
-	@shellcheck -x kenvx.bats
+	@shellcheck -x test/*.bats
 	@shellharden --check kenvx
-	@shellharden --check kenvx.bats
+	@shellharden --check test/*.bats
 
 .PHONY: test
 test:
-	@bats kenvx.bats
+	@bats test
 
 ### -----------------------
 # --- Kind
@@ -46,7 +46,7 @@ kind-cluster-clean:
 # https://hub.docker.com/r/kindest/node/tags
 .PHONY: kind-cluster-init
 kind-cluster-init:
-	kind create cluster --name kenvx --config=kind.yaml --kubeconfig .kube/config --image "kindest/node:v1.31.4"
+	kind create cluster --name kenvx --config=test/kind.yaml --kubeconfig .kube/config --image "kindest/node:v1.31.4"
 	$(MAKE) kind-fix-kubeconfig
 	sleep 1
 	$(MAKE) kind-cluster-init-script
@@ -59,7 +59,7 @@ kind-fix-kubeconfig:
 kind-cluster-init-script:
 	docker-compose up --no-start
 	docker-compose start
-	docker-compose exec service bash kind_init.sh
+	docker-compose exec service bash test/kind_init.sh
 
 .PHONY: kind-cluster-reset
 kind-cluster-reset:
