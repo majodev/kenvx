@@ -52,11 +52,7 @@ kenvx() {
   [ "$output" = "exec" ]
 }
 
-@test "deployment/sample: prints ENV" {
-  run kenvx deployment/sample
-  [ "$status" -eq 0 ]
-
-  expected_output=$(cat <<EOF
+EXPECTED_PRINT_OUTPUT=$(cat <<EOF
 SAMPLE_SINGLE=Simple string
 SAMPLE_MULTI=Multi line
 value
@@ -65,182 +61,83 @@ SAMPLE_SECRET=via secret
 SAMPLE_SECRET_64=via secret
 EOF
 )
+
+EXPECTED_EXEC_OUTPUT=$(cat <<EOF
+SAMPLE_SINGLE
+Simple string
+SAMPLE_MULTI
+Multi line
+value
+SAMPLE_CONFIGMAP
+via config map
+SAMPLE_SECRET
+via secret
+SAMPLE_SECRET_64
+via secret
+EOF
+)
+
+# Using single quotes to prevent premature expansion of variables
+# shellcheck disable=SC2016
+EXEC_PRINTF='printf "%s\n" \
+  "SAMPLE_SINGLE" "$SAMPLE_SINGLE" \
+  "SAMPLE_MULTI" "$SAMPLE_MULTI" \
+  "SAMPLE_CONFIGMAP" "$SAMPLE_CONFIGMAP" \
+  "SAMPLE_SECRET" "$SAMPLE_SECRET" \
+  "SAMPLE_SECRET_64" "$SAMPLE_SECRET_64"'
+
+@test "deployment/sample: prints ENV" {
+  run kenvx deployment/sample
+  [ "$status" -eq 0 ]
   # echo "${output}" >&3
-  [ "$output" = "$expected_output" ]
+  [ "$output" = "$EXPECTED_PRINT_OUTPUT" ]
 }
 
-# shellcheck disable=SC2016
-# Using single quotes to prevent premature expansion of variables
 @test "deployment/sample: exec with ENV" {
-
-  run kenvx deployment/sample -- sh -c 'echo "$SAMPLE_SINGLE"'
+  run kenvx deployment/sample -- sh -c "$EXEC_PRINTF"
   [ "$status" -eq 0 ]
   # echo "${output}" >&3
-  [ "$output" = "Simple string" ]
-
-  run kenvx deployment/sample -- sh -c 'echo "$SAMPLE_MULTI"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "Multi line
-value" ]
-
-  run kenvx deployment/sample -- sh -c 'echo "$SAMPLE_CONFIGMAP"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "via config map" ]
-
-  run kenvx deployment/sample -- sh -c 'echo "$SAMPLE_SECRET"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "via secret" ]
-
-  run kenvx deployment/sample -- sh -c 'echo "$SAMPLE_SECRET_64"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "via secret" ]
+  [ "$output" = "$EXPECTED_EXEC_OUTPUT" ]
 }
 
 @test "cronjob/sample: prints ENV" {
   run kenvx cronjob/sample
   [ "$status" -eq 0 ]
-
-  expected_output=$(cat <<EOF
-SAMPLE_SINGLE=Simple string
-SAMPLE_MULTI=Multi line
-value
-SAMPLE_CONFIGMAP=via config map
-SAMPLE_SECRET=via secret
-SAMPLE_SECRET_64=via secret
-EOF
-)
   # echo "${output}" >&3
-  [ "$output" = "$expected_output" ]
+  [ "$output" = "$EXPECTED_PRINT_OUTPUT" ]
 }
 
-# shellcheck disable=SC2016
-# Using single quotes to prevent premature expansion of variables
 @test "cronjob/sample: exec with ENV" {
-
-  run kenvx cronjob/sample -- sh -c 'echo "$SAMPLE_SINGLE"'
+  run kenvx cronjob/sample -- sh -c "$EXEC_PRINTF"
   [ "$status" -eq 0 ]
   # echo "${output}" >&3
-  [ "$output" = "Simple string" ]
-
-  run kenvx cronjob/sample -- sh -c 'echo "$SAMPLE_MULTI"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "Multi line
-value" ]
-
-  run kenvx cronjob/sample -- sh -c 'echo "$SAMPLE_CONFIGMAP"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "via config map" ]
-
-  run kenvx cronjob/sample -- sh -c 'echo "$SAMPLE_SECRET"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "via secret" ]
-
-  run kenvx cronjob/sample -- sh -c 'echo "$SAMPLE_SECRET_64"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "via secret" ]
+  [ "$output" = "$EXPECTED_EXEC_OUTPUT" ]
 }
 
 @test "job/sample: prints ENV" {
   run kenvx job/sample
   [ "$status" -eq 0 ]
-
-  expected_output=$(cat <<EOF
-SAMPLE_SINGLE=Simple string
-SAMPLE_MULTI=Multi line
-value
-SAMPLE_CONFIGMAP=via config map
-SAMPLE_SECRET=via secret
-SAMPLE_SECRET_64=via secret
-EOF
-)
   # echo "${output}" >&3
-  [ "$output" = "$expected_output" ]
+  [ "$output" = "$EXPECTED_PRINT_OUTPUT" ]
 }
 
-# shellcheck disable=SC2016
-# Using single quotes to prevent premature expansion of variables
 @test "job/sample: exec with ENV" {
-
-  run kenvx job/sample -- sh -c 'echo "$SAMPLE_SINGLE"'
+  run kenvx job/sample -- sh -c "$EXEC_PRINTF"
   [ "$status" -eq 0 ]
   # echo "${output}" >&3
-  [ "$output" = "Simple string" ]
-
-  run kenvx job/sample -- sh -c 'echo "$SAMPLE_MULTI"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "Multi line
-value" ]
-
-  run kenvx job/sample -- sh -c 'echo "$SAMPLE_CONFIGMAP"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "via config map" ]
-
-  run kenvx job/sample -- sh -c 'echo "$SAMPLE_SECRET"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "via secret" ]
-
-  run kenvx job/sample -- sh -c 'echo "$SAMPLE_SECRET_64"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "via secret" ]
+  [ "$output" = "$EXPECTED_EXEC_OUTPUT" ]
 }
-
 
 @test "daemonset/sample: prints ENV" {
   run kenvx daemonset/sample
   [ "$status" -eq 0 ]
-
-  expected_output=$(cat <<EOF
-SAMPLE_SINGLE=Simple string
-SAMPLE_MULTI=Multi line
-value
-SAMPLE_CONFIGMAP=via config map
-SAMPLE_SECRET=via secret
-SAMPLE_SECRET_64=via secret
-EOF
-)
   # echo "${output}" >&3
-  [ "$output" = "$expected_output" ]
+  [ "$output" = "$EXPECTED_PRINT_OUTPUT" ]
 }
 
-# shellcheck disable=SC2016
-# Using single quotes to prevent premature expansion of variables
 @test "daemonset/sample: exec with ENV" {
-
-  run kenvx daemonset/sample -- sh -c 'echo "$SAMPLE_SINGLE"'
+  run kenvx daemonset/sample -- sh -c "$EXEC_PRINTF"
   [ "$status" -eq 0 ]
   # echo "${output}" >&3
-  [ "$output" = "Simple string" ]
-
-  run kenvx daemonset/sample -- sh -c 'echo "$SAMPLE_MULTI"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "Multi line
-value" ]
-
-  run kenvx daemonset/sample -- sh -c 'echo "$SAMPLE_CONFIGMAP"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "via config map" ]
-
-  run kenvx daemonset/sample -- sh -c 'echo "$SAMPLE_SECRET"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "via secret" ]
-
-  run kenvx daemonset/sample -- sh -c 'echo "$SAMPLE_SECRET_64"'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "via secret" ]
+  [ "$output" = "$EXPECTED_EXEC_OUTPUT" ]
 }
