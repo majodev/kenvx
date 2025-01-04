@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sample
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+      - name: hello
+        image: busybox:1.36
+        command: ["echo", "hello"]
+        env:
+        - name: SAMPLE_SINGLE
+          value: "Simple string"
+        - name: SAMPLE_MULTI
+          value: "Multi line\nvalue"
+        - name: SAMPLE_CONFIGMAP
+          valueFrom:
+            configMapKeyRef:
+              name: sample
+              key: sample
+        - name: SAMPLE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: sample
+              key: sample
+        - name: SAMPLE_SECRET_64
+          valueFrom:
+            secretKeyRef:
+              name: sample-64
+              key: sample
+      restartPolicy: Never
