@@ -32,10 +32,6 @@ while [[ $# -gt 0 ]]; do
     fi
 
     case $1 in
-        */*)
-            RESOURCE="$1"
-            shift
-            ;;
         -n|--namespace)
             NAMESPACE="$2"
             shift 2
@@ -54,6 +50,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         *=*)
             ENV_VARS+=("$1")
+            shift
+            ;;
+        */*)
+            RESOURCE="$1"
             shift
             ;;
         *)

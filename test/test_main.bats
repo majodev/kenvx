@@ -34,6 +34,12 @@ kenvx() {
   assert_output "Error from server (NotFound): namespaces \"thisnamespaceisnotfound\" not found"
 }
 
+@test "fails on malformed env var" {
+  run kenvx deployment/sample "INVALID" -- env
+  assert_failure
+  assert_output --partial "Error: Invalid argument 'INVALID'"
+}
+
 @test "deployment/noenv: prints ENV (nothing)" {
   run kenvx deployment/noenv
   assert_success
@@ -153,5 +159,90 @@ SAMPLE_INITCONTAINER_1=one"
   assert_output "Error: Container 'notfound' not found in resource 'cronjob/multicontainer'"
 }
 
-# todo test with other namespace as in context
-# test with invalid referenced
+# shellcheck disable=SC2016
+@test "deployment/sample: handles env vars with special chars" {
+  run kenvx deployment/sample 'SPECIAL=!@#$%^&*()' -- sh -c 'echo "$SPECIAL"'
+  assert_success
+  assert_output "!@#$%^&*()"
+}
+
+# shellcheck disable=SC2016
+@test "deployment/sample: handles empty env vars" {
+  run kenvx deployment/sample EMPTY="" -- sh -c 'echo "EMPTY=$EMPTY"'
+  assert_success
+  assert_output "EMPTY="
+}
+
+# shellcheck disable=SC2016
+@test "deployment/sample: handles whitespace env vars" {
+  run kenvx deployment/sample 'SPACE=   ' -- sh -c 'echo "SPACE=$SPACE"'
+  assert_success
+  assert_output "SPACE=   "
+}
+
+@test "deployment/sample2: combines namespace, container and env override" {
+  run kenvx deployment/sample2 -n default2 -c pause-container SAMPLE_SINGLE=override -- sh -c 'env | grep SAMPLE_SINGLE'
+  assert_success
+  assert_output "SAMPLE_SINGLE=override"
+}
+
+@test "deployment/sample: accepts args in different order" {
+  run kenvx -n default MYVAR=test deployment/sample -c pause-container -- env
+  assert_success
+}
+
+# shellcheck disable=SC2016
+@test "deployment/sample: handles multiple env overrides" {
+  run kenvx deployment/sample VAR1=first VAR2=second -- sh -c 'echo "$VAR1:$VAR2"'
+  assert_success
+  assert_output "first:second"
+}
+
+# shellcheck disable=SC2016
+@test "deployment/sample: handles quotes in env values" {
+  run kenvx deployment/sample 'QUOTED=value with "quotes"' -- sh -c 'echo "$QUOTED"'
+  assert_success
+  assert_output 'value with "quotes"'
+}
+
+# shellcheck disable=SC2016
+@test "deployment/sample: handles long env names and values" {
+  run kenvx deployment/sample "VERY_LONG_ENVIRONMENT_VARIABLE_NAME_WITH_LOTS_OF_TEXT=very_long_value_that_goes_on_and_on" -- sh -c 'echo "$VERY_LONG_ENVIRONMENT_VARIABLE_NAME_WITH_LOTS_OF_TEXT"'
+  assert_success
+  assert_output "very_long_value_that_goes_on_and_on"
+}
+
+# shellcheck disable=SC2016
+@test "deployment/sample: handles path-like env values" {
+  run kenvx deployment/sample "PATH_VAR=/usr/local/bin:/usr/bin:/bin" -- sh -c 'echo "$PATH_VAR"'
+  assert_success
+  assert_output "/usr/local/bin:/usr/bin:/bin"
+}
+
+# shellcheck disable=SC2016
+@test "deployment/sample: handles equals in env values" {
+  run kenvx deployment/sample 'EXPR=key1=val1,key2=val2' -- sh -c 'echo "$EXPR"'
+  assert_success
+  assert_output "key1=val1,key2=val2"
+}
+
+# shellcheck disable=SC2016
+@test "deployment/sample: handles url-like env values" {
+  run kenvx deployment/sample "URL=https://example.com:8443" -- sh -c 'echo "$URL"'
+  assert_success
+  assert_output "https://example.com:8443"
+}
+
+# shellcheck disable=SC2016
+@test "deployment/sample: handles json-like env values" {
+  run kenvx deployment/sample 'JSON={"key":"value"}' -- sh -c 'echo "$JSON"'
+  assert_success
+  assert_output '{"key":"value"}'
+}
+
+# shellcheck disable=SC2016
+@test "deployment/sample: handles complex structured env values" {
+  run kenvx deployment/sample 'CONFIG=name=app;path=tmp;port=8080' -- sh -c 'echo "$CONFIG"'
+  assert_success
+  assert_output 'name=app;path=tmp;port=8080'
+}
