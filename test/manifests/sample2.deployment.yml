@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: default2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample2
+  namespace: default2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sample2
+  template:
+    metadata:
+      labels:
+        app: sample2
+    spec:
+      containers:
+      - name: pause-container
+        image: k8s.gcr.io/pause:3.9
+        env:
+        - name: SAMPLE_SINGLE
+          value: "Simple string 2"
+        - name: SAMPLE_MULTI
+          value: "Multi line\nvalue 2"
+        - name: SAMPLE_CONFIGMAP
+          valueFrom:
+            configMapKeyRef:
+              name: sample
+              key: sample
+              optional: true
+        - name: SAMPLE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: sample
+              key: sample
+              optional: true
+        - name: SAMPLE_SECRET_64
+          valueFrom:
+            secretKeyRef:
+              name: sample-64
+              key: sample
+              optional: true

@@ -78,6 +78,17 @@ multi"
 multi"
 }
 
+@test "deployment/sample2 -n default2: prints (partial) ENV" {
+  expected="SAMPLE_SINGLE=Simple string 2
+SAMPLE_MULTI=Multi line
+value 2"
+
+  run kenvx -n default2 deployment/sample2
+  assert_output "$expected"
+
+  run kenvx --namespace default2 deployment/sample2
+  assert_output "$expected"
+}
 
 # target namespace
 # kenvx deployment/app -n allaboutapps-go-starter-dev
@@ -96,3 +107,4 @@ multi"
 # test with specific container
 # test with duplicated env
 
+# test envFrom support (which is something the default list does not support!)

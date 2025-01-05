@@ -16,27 +16,74 @@ usage() {
     exit 1
 }
 
-# Check if at least kubernetes_object is provided
-if [ $# -lt 1 ]; then
+# Initialize variables
+RESOURCE=""
+NAMESPACE=""
+CONTAINER=""
+ENV_VARS=()
+COMMAND_AND_ARGS=()
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    if [ "$1" = "--" ]; then
+        shift
+        COMMAND_AND_ARGS=("$@")
+        break
+    fi
+
+    case $1 in
+        */*)
+            RESOURCE="$1"
+            shift
+            ;;
+        -n|--namespace)
+            NAMESPACE="$2"
+            shift 2
+            ;;
+        --namespace=*)
+            NAMESPACE="${1#*=}"
+            shift
+            ;;
+        -c|--container)
+            CONTAINER="$2"
+            shift 2
+            ;;
+        --container=*)
+            CONTAINER="${1#*=}"
+            shift
+            ;;
+        *=*)
+            ENV_VARS+=("$1")
+            shift
+            ;;
+        *)
+            echo "Error: Invalid argument '$1'"
+            usage
+            ;;
+    esac
+done
+
+# Validate mandatory resource argument
+if [[ -z "$RESOURCE" ]]; then
+    echo "Error: Resource (kind/name) is required"
     usage
 fi
 
-# Split args into kubectl_args and command
-KUBECTL_ARGS=()
-COMMAND_AND_ARGS=()
-FOUND_SEPARATOR=0
+# Build kubectl arguments array for get commands
+KUBECTL_GET_ARGS=()
+[[ -n "$NAMESPACE" ]] && KUBECTL_GET_ARGS+=("-n" "$NAMESPACE")
 
-for arg in "$@"; do
-    if [ "$arg" = "--" ]; then
-        FOUND_SEPARATOR=1
-        continue
-    fi
-    
-    if [ "$FOUND_SEPARATOR" -eq 0 ]; then
-        KUBECTL_ARGS+=("$arg")
-    else
-        COMMAND_AND_ARGS+=("$arg")
-    fi
+# Check if the resource exists
+kubectl get "$RESOURCE" "${KUBECTL_GET_ARGS[@]}" >/dev/null
+
+# Build kubectl arguments array for env list command
+KUBECTL_ENV_ARGS=("$RESOURCE")
+[[ -n "$NAMESPACE" ]] && KUBECTL_ENV_ARGS+=("-n" "$NAMESPACE")
+[[ -n "$CONTAINER" ]] && KUBECTL_ENV_ARGS+=("-c" "$CONTAINER")
+
+# Add environment variable overrides
+for env in "${ENV_VARS[@]}"; do
+    KUBECTL_ENV_ARGS+=("--env=$env")
 done
 
 # Temporary file to store environment variables
@@ -44,12 +91,12 @@ TMP_ENV_FILE=$(mktemp)
 trap 'rm -f "$TMP_ENV_FILE"' EXIT
 
 # Extract environment variables using kubectl set env
-kubectl set env "${KUBECTL_ARGS[@]}" --resolve --list --overwrite=true --dry-run='client' \
+kubectl set env "${KUBECTL_ENV_ARGS[@]}" --resolve --list --overwrite=true --dry-run='client' 2>/dev/null \
     | (grep -v '^#' || true) \
     > "$TMP_ENV_FILE"
 
-# # Get all containers (regular and init) with their envFrom references
-if CONTAINERS_JSON=$(kubectl get "${KUBECTL_ARGS[0]}" -o json | \
+# Get all containers (regular and init) with their envFrom references
+if CONTAINERS_JSON=$(kubectl get "$RESOURCE" "${KUBECTL_GET_ARGS[@]}" -o json | \
     jq -r '
     # First, determine the path to containers based on resource type
     (if .spec.jobTemplate then
@@ -86,11 +133,11 @@ if CONTAINERS_JSON=$(kubectl get "${KUBECTL_ARGS[0]}" -o json | \
         
         case "$ref_type" in
             "configmap")
-                kubectl get configmap "$ref_name" -o json 2>/dev/null | \
+                kubectl get configmap "$ref_name" "${KUBECTL_GET_ARGS[@]}" -o json 2>/dev/null | \
                     jq -r '.data // {} | to_entries | map("\(.key)=\(.value)") | .[]' || true
                 ;;
             "secret")
-                kubectl get secret "$ref_name" -o json 2>/dev/null | \
+                kubectl get secret "$ref_name" "${KUBECTL_GET_ARGS[@]}" -o json 2>/dev/null | \
                     jq -r '.data // {} | to_entries | map("\(.key)=\(.value | @base64d)") | .[]' || true
                 ;;
         esac
