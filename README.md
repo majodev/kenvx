@@ -1,6 +1,6 @@
 # kenvx
 
-A bash script to extract and use Kubernetes environment variables locally.
+A bash script to extract and inject Kubernetes environment variables locally.
 
 - [kenvx](#kenvx)
   - [Features](#features)

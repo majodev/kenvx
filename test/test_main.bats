@@ -246,3 +246,6 @@ SAMPLE_INITCONTAINER_1=one"
   assert_success
   assert_output 'name=app;path=tmp;port=8080'
 }
+
+# TODO test multi-line values tranformed to single line feature
+# TODO test equals in multi-line values
