@@ -111,9 +111,32 @@ value 2"
   assert_output "$expected"
 }
 
+@test "cronjob/multicontainer: prints all ENV from all containers" {
+  run kenvx cronjob/multicontainer
+  assert_output "SAMPLE_FROM_CONTAINER_1=one
+SAMPLE_FROM_CONTAINER_2=two
+SAMPLE_CONTAINER_1=one
+SAMPLE_CONTAINER_2=two"
+}
+
+@test "cronjob/multicontainer: limit ENV from container1" {
+  run kenvx cronjob/multicontainer -c container1
+  assert_output "SAMPLE_FROM_CONTAINER_1=one
+SAMPLE_CONTAINER_1=one"
+}
+
+@test "cronjob/multicontainer: limit ENV from container2" {
+  run kenvx cronjob/multicontainer -c container2
+  assert_output "SAMPLE_FROM_CONTAINER_2=two
+SAMPLE_CONTAINER_2=two"
+}
+
+@test "cronjob/multicontainer: fails on limit ENV from notfound container" {
+  skip
+  run kenvx cronjob/multicontainer -c notfound
+  assert_failure
+}
+
 # todo test with other namespace as in context
 # test with invalid referenced
 # test with specific container
-# test with duplicated env
-
-# test envFrom support (which is something the default list does not support!)

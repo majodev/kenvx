@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sample-env-1
+  namespace: default
+data:
+  SAMPLE_FROM_CONTAINER_1: one
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sample-env-2
+  namespace: default
+data:
+  SAMPLE_FROM_CONTAINER_2: two
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: multicontainer
+  namespace: default
+spec:
+  schedule: "* * * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: container1
+            image: busybox:1.36
+            command: ["echo", "one"]
+            envFrom:
+            - configMapRef:
+                name: sample-env-1
+            env:
+            - name: SAMPLE_CONTAINER_1
+              value: one
+          - name: container2
+            image: busybox:1.36
+            command: ["echo", "two"]
+            envFrom:
+            - configMapRef:
+                name: sample-env-2
+            env:
+            - name: SAMPLE_CONTAINER_2
+              value: two
+          restartPolicy: Never

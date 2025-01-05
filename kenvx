@@ -93,7 +93,7 @@ trap 'rm -f "$TMP_ENV_FILE"' EXIT
 # First process envFrom references from containers (those might be overwritten by the later env vars)
 # Get all containers (regular and init) with their envFrom references
 if CONTAINERS_JSON=$(kubectl get "$RESOURCE" "${KUBECTL_GET_ARGS[@]}" -o json | \
-    jq -r '
+    jq -r --arg container "$CONTAINER" '
     # First, determine the path to containers based on resource type
     (if .spec.jobTemplate then
         .spec.jobTemplate.spec.template.spec
@@ -101,13 +101,11 @@ if CONTAINERS_JSON=$(kubectl get "$RESOURCE" "${KUBECTL_GET_ARGS[@]}" -o json | 
         .spec.template.spec
     else
         .spec
-    end) as $spec |
-    # Combine both regular and init containers if they exist
-    {
-        containers: ($spec.containers // []),
-        initContainers: ($spec.initContainers // [])
+    end) as $spec
+    | {
+        containers: ($spec.containers // []) | map(select(($container == "") or .name == $container)),
+        initContainers: ($spec.initContainers // []) | map(select(($container == "") or .name == $container))
     }') && [ "$CONTAINERS_JSON" != "" ]; then
-
 
     # Process both container types
     echo "$CONTAINERS_JSON" | \
@@ -180,8 +178,6 @@ trap 'rm -f "$TEMP_SCRIPT" "$TMP_ENV_FILE"' EXIT
         printf "export %s=$'%s'\n" "$current_key" "$escaped_value"
     fi
 } > "$TEMP_SCRIPT"
-
-# cat $TEMP_SCRIPT >&3
 
 # Source exports and run command
 # shellcheck source=/dev/null

@@ -4,6 +4,7 @@ A bash script to extract and use Kubernetes environment variables locally.
 
 - [kenvx](#kenvx)
   - [Features](#features)
+  - [Requirements](#requirements)
   - [Usage](#usage)
     - [Supported arguments](#supported-arguments)
     - [Examples](#examples)
@@ -20,6 +21,12 @@ A bash script to extract and use Kubernetes environment variables locally.
 - Supports variable overrides
 - Can execute commands with the extracted variables
 - Works with any Kubernetes resource type (Deployments, StatefulSets, CronJobs, etc.)
+
+## Requirements
+
+`bash`, `kubectl` and `jq` must be installed.
+
+> TODO add support matrix.
 
 ## Usage
 
