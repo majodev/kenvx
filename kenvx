@@ -73,8 +73,27 @@ fi
 KUBECTL_GET_ARGS=()
 [[ -n "$NAMESPACE" ]] && KUBECTL_GET_ARGS+=("-n" "$NAMESPACE")
 
-# Check if the resource exists
-kubectl get "$RESOURCE" "${KUBECTL_GET_ARGS[@]}" >/dev/null
+# Check if the resource exists and if so, get and cache the full JSON output
+RESOURCE_JSON=$(kubectl get "$RESOURCE" "${KUBECTL_GET_ARGS[@]}" -o json)
+
+# If container is specified, validate it exists
+if [[ -n "$CONTAINER" ]]; then
+    CONTAINER_EXISTS=$(echo "$RESOURCE_JSON" | jq -r --arg container "$CONTAINER" '
+    (if .spec.jobTemplate then
+        .spec.jobTemplate.spec.template.spec
+    elif .spec.template then
+        .spec.template.spec
+    else
+        .spec
+    end) as $spec
+    | ($spec.containers + ($spec.initContainers // [])) | map(.name) | contains([$container])
+    ')
+    
+    if [[ "$CONTAINER_EXISTS" != "true" ]]; then
+        echo "Error: Container '$CONTAINER' not found in resource '$RESOURCE'"
+        exit 1
+    fi
+fi
 
 # Build kubectl arguments array for env list command
 KUBECTL_ENV_ARGS=("$RESOURCE")
@@ -92,7 +111,7 @@ trap 'rm -f "$TMP_ENV_FILE"' EXIT
 
 # First process envFrom references from containers (those might be overwritten by the later env vars)
 # Get all containers (regular and init) with their envFrom references
-if CONTAINERS_JSON=$(kubectl get "$RESOURCE" "${KUBECTL_GET_ARGS[@]}" -o json | \
+if CONTAINERS_JSON=$(echo "$RESOURCE_JSON" | \
     jq -r --arg container "$CONTAINER" '
     # First, determine the path to containers based on resource type
     (if .spec.jobTemplate then

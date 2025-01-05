@@ -132,9 +132,9 @@ SAMPLE_CONTAINER_2=two"
 }
 
 @test "cronjob/multicontainer: fails on limit ENV from notfound container" {
-  skip
   run kenvx cronjob/multicontainer -c notfound
   assert_failure
+  assert_output "Error: Container 'notfound' not found in resource 'cronjob/multicontainer'"
 }
 
 # todo test with other namespace as in context
