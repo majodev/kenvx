@@ -36,7 +36,7 @@ kenvx <kind/name> [-n|--namespace <namespace>] [-c|--container <container>] [ENV
 
 ### Supported arguments
 
-* `kind/name`: Resource type and name (required)
+* `kind/name`: Kubernetes resource kind and name (required)
 * `-n, --namespace`: Kubernetes namespace
 * `-c, --container`: Container name
 * `ENV_KEY=ENV_VALUE`: Environment variable overrides
@@ -45,8 +45,12 @@ kenvx <kind/name> [-n|--namespace <namespace>] [-c|--container <container>] [ENV
 ### Examples
 
 ```bash
-# Print all environment variables
+# Print all environment variables of a resource, e.g.
 kenvx deployment/myapp
+kenvx pod/myapp
+kenvx job/myapp
+kenvx cronjob/myapp
+kenvx daemonset/myapp
 
 # Print variables from specific namespace
 kenvx deployment/myapp -n prod
