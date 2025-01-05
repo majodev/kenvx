@@ -37,6 +37,8 @@ RUN apt-get update \
     # -- START DEVELOPMENT --
     apt-utils \
     bats \
+    bats-assert \
+    bats-support \
     bash-completion \
     bsdmainutils \
     curl \

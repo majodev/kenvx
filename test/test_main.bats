@@ -1,79 +1,98 @@
 #!/usr/bin/env bats
 
+setup_file() {
+  kubectl config use-context kind-kenvx
+  kubectl config set-context --current --namespace default
+}
+
+setup() {
+  bats_load_library bats-support
+  bats_load_library bats-assert # https://github.com/bats-core/bats-assert
+}
+
 kenvx() {
   bash "$PROJECT_ROOT_DIR"/kenvx "$@"
 }
 
 @test "fails on missing arguments" {
   run kenvx
-  # echo "${output}" >&3
-  [ "$status" -eq 1 ]
+  assert_failure
 }
 
 @test "fails on invalid resource kind" {
   run kenvx invalid/app
-  # echo "${output}" >&3
-  [ "$status" -eq 1 ]
-  [ "$output" = "error: the server doesn't have a resource type \"invalid\"" ]
+  assert_failure
+  assert_output "error: the server doesn't have a resource type \"invalid\""
 }
 
 @test "fails on invalid resource name" {
   run kenvx deployment/notfound
-  # echo "${output}" >&3
-  [ "$status" -eq 1 ]
-  [ "$output" = "Error from server (NotFound): deployments.apps \"notfound\" not found" ]
+  assert_failure
+  assert_output "Error from server (NotFound): deployments.apps \"notfound\" not found"
 }
 
 @test "deployment/noenv: prints ENV (nothing)" {
   run kenvx deployment/noenv
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "" ]
+  assert_success
+  assert_output ""
 }
 
 @test "deployment/noenv: exec with ENV" {
   run kenvx deployment/noenv -- sh -c 'echo exec'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "exec" ]
+  assert_success
+  assert_output "exec"
 }
 
 @test "deployment/emptyenv: prints ENV (nothing)" {
   run kenvx deployment/emptyenv
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "" ]
+  assert_success
+  assert_output ""
 }
 
 @test "deployment/emptyenv: exec with ENV" {
   run kenvx deployment/emptyenv -- sh -c 'echo exec'
-  [ "$status" -eq 0 ]
-  # echo "${output}" >&3
-  [ "$output" = "exec" ]
+  assert_success
+  assert_output "exec"
 }
 
 # shellcheck disable=SC2016
 @test "deployment/emptyenv: exec with ENV add (new var single)" {
   run kenvx deployment/emptyenv MYVAR=added -- sh -c 'echo "$MYVAR"'
-  [ "$status" -eq 0 ]
-  # echo "$output" >&3
-  [ "$output" = "added" ]
+  assert_success
+  assert_output "added"
 }
 
 # shellcheck disable=SC2016
 @test "deployment/emptyenv: exec with ENV add (new var multi)" {
   run kenvx deployment/emptyenv MYVAR="added\nmulti" -- sh -c 'echo "$MYVAR"'
-  [ "$status" -eq 0 ]
-  # echo "$output" >&3
-  [ "$output" = "added
-multi" ]
+  assert_success
+  assert_output "added
+multi"
 }
 
 # shellcheck disable=SC2016
 @test "deployment/sample: exec with ENV multiline override" {
   run kenvx deployment/sample SAMPLE_MULTI="override\nmulti" -- sh -c 'echo "$SAMPLE_MULTI"'
-  [ "$status" -eq 0 ]
-  # echo "$output" >&3
-  [ "$output" = "override
-multi" ]
+  assert_success
+  assert_output "override
+multi"
 }
+
+
+# target namespace
+# kenvx deployment/app -n allaboutapps-go-starter-dev
+# kenvx deploy/appd
+# kenvx deploy/app-base
+# kenvx deploy/app
+# kenvx deploy/app -n allaboutapps-gostarter-dev
+# kenvx -n allaboutapps-go-starter-dev deploy/app
+# kenvx deploy/app -n allaboutapps-go-starter-devd
+# kenvx deploy/app -n allaboutapps-go-starter-dev
+# kenvx deployment/app -n allaboutapps-go-starter-dev --
+# kenvx deployment/app -n allaboutapps-go-starter-dev
+
+# todo test with other namespace as in context
+# test with invalid referenced
+# test with specific container
+# test with duplicated env
+
