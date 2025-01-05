@@ -12,6 +12,8 @@ kenvx() {
 @test "fails on missing arguments" {
   run kenvx
   assert_failure
+  assert_output --partial "Error: Resource (kind/name) is required"
+  assert_output --partial "Usage:"
 }
 
 @test "fails on invalid resource kind" {
@@ -24,6 +26,12 @@ kenvx() {
   run kenvx deployment/notfound
   assert_failure
   assert_output "Error from server (NotFound): deployments.apps \"notfound\" not found"
+}
+
+@test "fails on invalid namespace" {
+  run kenvx deploy/sample -n thisnamespaceisnotfound
+  assert_failure
+  assert_output "Error from server (NotFound): namespaces \"thisnamespaceisnotfound\" not found"
 }
 
 @test "deployment/noenv: prints ENV (nothing)" {
@@ -139,7 +147,7 @@ SAMPLE_CONTAINER_2=two"
 SAMPLE_INITCONTAINER_1=one"
 }
 
-@test "cronjob/multicontainer: fails on limit ENV from notfound container" {
+@test "cronjob/multicontainer: fails on invalid ENV from notfound container" {
   run kenvx cronjob/multicontainer -c notfound
   assert_failure
   assert_output "Error: Container 'notfound' not found in resource 'cronjob/multicontainer'"
@@ -147,4 +155,3 @@ SAMPLE_INITCONTAINER_1=one"
 
 # todo test with other namespace as in context
 # test with invalid referenced
-# test with specific container

@@ -7,12 +7,12 @@ usage() {
     echo "Usage: $ORIGIN_SCRIPT <kind/name> [-n|--namespace <namespace>] [-c|--container <container>] [ENV_KEY=ENV_VALUE...] [-- command [args...]]"
     echo "Examples:"
     echo "  $ORIGIN_SCRIPT deployment/myapp                                    # Print all environment variables"
-    echo "  $ORIGIN_SCRIPT deployment/myapp -n prod                           # Print variables from prod namespace"
-    echo "  $ORIGIN_SCRIPT deployment/myapp -c nginx                          # Print variables from nginx container"
-    echo "  $ORIGIN_SCRIPT cronjob/backup MY_VAR=override                     # Print variables with override"
-    echo "  $ORIGIN_SCRIPT deployment/myapp -n prod -c nginx MY_VAR=value    # Combined usage"
-    echo "  $ORIGIN_SCRIPT deployment/myapp -- env                           # Run command with variables"
-    echo "  $ORIGIN_SCRIPT deployment/myapp -c nginx -- env                  # Run command with container vars"
+    echo "  $ORIGIN_SCRIPT deployment/myapp -n prod                            # Print variables from prod namespace"
+    echo "  $ORIGIN_SCRIPT deployment/myapp -c nginx                           # Print variables from nginx container"
+    echo "  $ORIGIN_SCRIPT cronjob/backup MY_VAR=override                      # Print variables with override"
+    echo "  $ORIGIN_SCRIPT deployment/myapp -n prod -c nginx MY_VAR=value      # Combined usage"
+    echo "  $ORIGIN_SCRIPT deployment/myapp -- env                             # Run command with variables"
+    echo "  $ORIGIN_SCRIPT deployment/myapp -c nginx -- env                    # Run command with container vars"
     exit 1
 }
 
