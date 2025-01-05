@@ -62,6 +62,11 @@ kenvx deployment/myapp -- env
 
 # Combined usage
 kenvx deployment/myapp -n prod -c nginx MY_VAR=local -- ./script.sh
+
+# Use with docker (e.g. to run a local container with the extracted ENV variables)
+# Note: This example uses process substitution, which is a bash feature.
+# If you are using a different shell, you can save the output of `kenvx` to a file and use `--env-file` instead.
+docker run --env-file <(./kenvx deployment/app-base -c postgres) -it alpine env
 ```
 
 ## Installation
