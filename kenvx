@@ -90,11 +90,7 @@ done
 TMP_ENV_FILE=$(mktemp)
 trap 'rm -f "$TMP_ENV_FILE"' EXIT
 
-# Extract environment variables using kubectl set env
-kubectl set env "${KUBECTL_ENV_ARGS[@]}" --resolve --list --overwrite=true --dry-run='client' 2>/dev/null \
-    | (grep -v '^#' || true) \
-    > "$TMP_ENV_FILE"
-
+# First process envFrom references from containers (those might be overwritten by the later env vars)
 # Get all containers (regular and init) with their envFrom references
 if CONTAINERS_JSON=$(kubectl get "$RESOURCE" "${KUBECTL_GET_ARGS[@]}" -o json | \
     jq -r '
@@ -143,6 +139,11 @@ if CONTAINERS_JSON=$(kubectl get "$RESOURCE" "${KUBECTL_GET_ARGS[@]}" -o json | 
         esac
     done >> "$TMP_ENV_FILE"
 fi
+
+# Extract environment variables using kubectl set env
+kubectl set env "${KUBECTL_ENV_ARGS[@]}" --resolve --list --overwrite=true --dry-run='client' 2>/dev/null \
+    | (grep -v '^#' || true) \
+    >> "$TMP_ENV_FILE"
 
 # If no command is provided, just print the environment variables
 if [ ${#COMMAND_AND_ARGS[@]} -eq 0 ]; then

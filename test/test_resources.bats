@@ -10,15 +10,15 @@ kenvx() {
 }
 
 EXPECTED_PRINT_OUTPUT=$(cat <<EOF
+SAMPLE_FROM_MULTI=Multi line
+value
+SAMPLE_FROM_SINGLE=single
 SAMPLE_SINGLE=Simple string
 SAMPLE_MULTI=Multi line
 value
 SAMPLE_CONFIGMAP=via config map
 SAMPLE_SECRET=via secret
 SAMPLE_SECRET_64=via secret
-SAMPLE_FROM_MULTI=Multi line
-value
-SAMPLE_FROM_SINGLE=single
 EOF
 )
 

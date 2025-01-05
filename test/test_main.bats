@@ -75,7 +75,6 @@ multi"
 
 # shellcheck disable=SC2016
 @test "deployment/sample: exec with envFrom multiline override" {
-  skip
   run kenvx deployment/sample SAMPLE_FROM_MULTI="override\nmulti" -- sh -c 'echo "$SAMPLE_FROM_MULTI"'
   assert_success
   assert_output "override
@@ -84,7 +83,6 @@ multi"
 
 # shellcheck disable=SC2016
 @test "cronjob/envfrom: exec with envFrom manifest SAMPLE_FROM_SINGLE override" {
-  skip
   run kenvx cronjob/envfrom -- sh -c 'echo "$SAMPLE_FROM_SINGLE"'
   assert_success
   assert_output "override"
