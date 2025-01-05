@@ -1,5 +1,72 @@
 # kenvx
 
+A bash script to extract and use Kubernetes environment variables locally.
+
+- [kenvx](#kenvx)
+  - [Features](#features)
+  - [Usage](#usage)
+    - [Supported arguments](#supported-arguments)
+    - [Examples](#examples)
+  - [Installation](#installation)
+    - [Development setup](#development-setup)
+
+
+## Features
+
+`kenvx` extracts environment variables from Kubernetes resources including those defined in `envFrom` references (ConfigMaps and Secrets). It can display these variables or use them to run local commands.
+
+- Lists all environment variables from a Kubernetes resource
+- Resolves `envFrom` references (ConfigMaps and Secrets), a typical limitation of `kubectl set env --resolve --list`.
+- Supports variable overrides
+- Can execute commands with the extracted variables
+- Works with any Kubernetes resource type (Deployments, StatefulSets, CronJobs, etc.)
+
+## Usage
+
+```bash
+kenvx <kind/name> [-n|--namespace <namespace>] [-c|--container <container>] [ENV_KEY=ENV_VALUE...] [-- command [args...]]
+```
+
+### Supported arguments
+
+* `kind/name`: Resource type and name (required)
+* `-n, --namespace`: Kubernetes namespace
+* `-c, --container`: Container name
+* `ENV_KEY=ENV_VALUE`: Environment variable overrides
+* `-- command [args...]`: Command to run with the environment variables
+
+### Examples
+
+```bash
+# Print all environment variables
+kenvx deployment/myapp
+
+# Print variables from specific namespace
+kenvx deployment/myapp -n prod
+
+# Print variables from specific container
+kenvx deployment/myapp -c nginx
+
+# Override variables
+kenvx deployment/myapp DEBUG=true API_URL=http://localhost:8080
+
+# Run command with variables
+kenvx deployment/myapp -- env
+
+# Combined usage
+kenvx deployment/myapp -n prod -c nginx MY_VAR=local -- ./script.sh
+```
+
+## Installation
+
+```bash
+# Clone and install
+git clone https://github.com/majodev/kenvx.git
+cd kenvx
+chmod +x kenvx
+sudo cp kenvx /usr/local/bin/
+```
+
 ### Development setup
 
 ```bash
@@ -19,17 +86,4 @@ development@da38d91ede55:/app$ k get nodes
 
 # Runs lint and tests
 development@20c533ecf4c7:/app$ make
-# make build
-# make test
-# kenvx.bats
-#  ✓ fails on missing arguments
-#  ✓ fails on invalid resource kind
-#  ✓ fails on invalid resource name
-#  ✓ deployment/noenv: prints ENV (nothing)
-#  ✓ deployment/noenv: exec with ENV
-#  ✓ deployment/emptyenv: prints ENV (nothing)
-#  ✓ deployment/emptyenv: exec with ENV
-#  ✓ deployment/sample: prints ENV
-#  ✓ deployment/sample: exec with ENV
-#  [...]
 ```

@@ -1,10 +1,5 @@
 #!/usr/bin/env bats
 
-setup_file() {
-  kubectl config use-context kind-kenvx
-  kubectl config set-context --current --namespace default
-}
-
 setup() {
   bats_load_library bats-support
   bats_load_library bats-assert # https://github.com/bats-core/bats-assert
@@ -78,6 +73,34 @@ multi"
 multi"
 }
 
+# shellcheck disable=SC2016
+@test "deployment/sample: exec with envFrom multiline override" {
+  skip
+  run kenvx deployment/sample SAMPLE_FROM_MULTI="override\nmulti" -- sh -c 'echo "$SAMPLE_FROM_MULTI"'
+  assert_success
+  assert_output "override
+multi"
+}
+
+# shellcheck disable=SC2016
+@test "cronjob/envfrom: exec with envFrom manifest SAMPLE_FROM_SINGLE override" {
+  skip
+  run kenvx cronjob/envfrom -- sh -c 'echo "$SAMPLE_FROM_SINGLE"'
+  assert_success
+  assert_output "override"
+}
+
+@test "cronjob/invalidrefs: prints (partial) ENV" {
+  run kenvx cronjob/invalidrefs
+  assert_output "SAMPLE_HERE=working"
+}
+
+@test "cronjob/duplicates: prints (partial) ENV" {
+  run kenvx cronjob/duplicates
+  assert_output "SAMPLE_HERE=working
+SAMPLE_DUP=first_occurrence"
+}
+
 @test "deployment/sample2 -n default2: prints (partial) ENV" {
   expected="SAMPLE_SINGLE=Simple string 2
 SAMPLE_MULTI=Multi line
@@ -89,18 +112,6 @@ value 2"
   run kenvx --namespace default2 deployment/sample2
   assert_output "$expected"
 }
-
-# target namespace
-# kenvx deployment/app -n allaboutapps-go-starter-dev
-# kenvx deploy/appd
-# kenvx deploy/app-base
-# kenvx deploy/app
-# kenvx deploy/app -n allaboutapps-gostarter-dev
-# kenvx -n allaboutapps-go-starter-dev deploy/app
-# kenvx deploy/app -n allaboutapps-go-starter-devd
-# kenvx deploy/app -n allaboutapps-go-starter-dev
-# kenvx deployment/app -n allaboutapps-go-starter-dev --
-# kenvx deployment/app -n allaboutapps-go-starter-dev
 
 # todo test with other namespace as in context
 # test with invalid referenced

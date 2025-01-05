@@ -1,9 +1,5 @@
 #!/bin/bash
-set -Eeox pipefail
-
-kubectl version
-kubectl get nodes
-kubectl config current-context
+set -Eeo pipefail
 
 # Exit immediately if the current kubectl context is not kind-kenvx
 if [[ $(kubectl config current-context) != "kind-kenvx" ]]; then
@@ -11,4 +7,6 @@ if [[ $(kubectl config current-context) != "kind-kenvx" ]]; then
   exit 1
 fi
 
+kubectl config set-context --current --namespace default
+kubectl delete job/sample || true
 kubectl apply -f ./test/manifests/

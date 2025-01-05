@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: sample
+  name: invalidrefs
   namespace: default
 spec:
   schedule: "* * * * *"
@@ -14,27 +14,22 @@ spec:
           - name: hello
             image: busybox:1.36
             command: ["echo", "hello"]
-            envFrom:
-            - configMapRef:
-                name: sample-env
             env:
-            - name: SAMPLE_SINGLE
-              value: "Simple string"
-            - name: SAMPLE_MULTI
-              value: "Multi line\nvalue"
-            - name: SAMPLE_CONFIGMAP
+            - name: SAMPLE_NON_EXISTING
               valueFrom:
                 configMapKeyRef:
-                  name: sample
+                  name: non-existing
                   key: sample
-            - name: SAMPLE_SECRET
+            - name: SAMPLE_NON_EXISTING_2
               valueFrom:
                 secretKeyRef:
-                  name: sample
+                  name: non-existing
                   key: sample
-            - name: SAMPLE_SECRET_64
+            - name: SAMPLE_NON_EXISTING_3
               valueFrom:
                 secretKeyRef:
-                  name: sample-64
+                  name: non-existing
                   key: sample
+            - name: SAMPLE_HERE
+              value: working
           restartPolicy: Never

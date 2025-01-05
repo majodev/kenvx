@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: envfrom
+  namespace: default
+spec:
+  schedule: "* * * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox:1.36
+            command: ["echo", "hello"]
+            envFrom:
+            - configMapRef:
+                name: sample-env
+            env:
+            - name: SAMPLE_FROM_SINGLE # override from envFrom
+              value: override
+            - name: SAMPLE_ADDITIONAL
+              value: additional
+          restartPolicy: Never

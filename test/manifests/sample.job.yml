@@ -10,6 +10,9 @@ spec:
       - name: hello
         image: busybox:1.36
         command: ["echo", "hello"]
+        envFrom:
+        - configMapRef:
+            name: sample-env
         env:
         - name: SAMPLE_SINGLE
           value: "Simple string"

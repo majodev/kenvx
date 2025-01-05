@@ -1,10 +1,5 @@
 #!/usr/bin/env bats
 
-setup_file() {
-  kubectl config use-context kind-kenvx
-  kubectl config set-context --current --namespace default
-}
-
 setup() {
   bats_load_library bats-support
   bats_load_library bats-assert # https://github.com/bats-core/bats-assert
@@ -21,6 +16,9 @@ value
 SAMPLE_CONFIGMAP=via config map
 SAMPLE_SECRET=via secret
 SAMPLE_SECRET_64=via secret
+SAMPLE_FROM_MULTI=Multi line
+value
+SAMPLE_FROM_SINGLE=single
 EOF
 )
 
@@ -32,6 +30,11 @@ Multi line
 value
 SAMPLE_CONFIGMAP
 via config map
+SAMPLE_FROM_SINGLE
+single
+SAMPLE_FROM_MULTI
+Multi line
+value
 SAMPLE_SECRET
 via secret
 SAMPLE_SECRET_64
@@ -45,6 +48,8 @@ EXEC_PRINTF='printf "%s\n" \
   "SAMPLE_SINGLE" "$SAMPLE_SINGLE" \
   "SAMPLE_MULTI" "$SAMPLE_MULTI" \
   "SAMPLE_CONFIGMAP" "$SAMPLE_CONFIGMAP" \
+  "SAMPLE_FROM_SINGLE" "$SAMPLE_FROM_SINGLE" \
+  "SAMPLE_FROM_MULTI" "$SAMPLE_FROM_MULTI" \
   "SAMPLE_SECRET" "$SAMPLE_SECRET" \
   "SAMPLE_SECRET_64" "$SAMPLE_SECRET_64"'
 

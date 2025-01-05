@@ -16,6 +16,9 @@ spec:
       containers:
       - name: pause-container
         image: k8s.gcr.io/pause:3.9
+        envFrom:
+        - configMapRef:
+            name: sample-env
         env:
         - name: SAMPLE_SINGLE
           value: "Simple string"

@@ -29,6 +29,7 @@ lint:
 
 .PHONY: test
 test:
+	@bash test/kind_init.sh
 	@bats test
 
 ### -----------------------
