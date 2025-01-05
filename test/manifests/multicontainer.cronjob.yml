@@ -14,6 +14,14 @@ metadata:
 data:
   SAMPLE_FROM_CONTAINER_2: two
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sample-init-env-1
+  namespace: default
+data:
+  SAMPLE_FROM_INIT_CONTAINER_1: one
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -26,6 +34,18 @@ spec:
     spec:
       template:
         spec:
+
+          initContainers:
+          - name: init-container1
+            image: busybox:1.36
+            command: ["echo", "one"]
+            envFrom:
+            - configMapRef:
+                name: sample-init-env-1
+            env:
+            - name: SAMPLE_INITCONTAINER_1
+              value: one
+          
           containers:
           - name: container1
             image: busybox:1.36

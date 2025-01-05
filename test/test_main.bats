@@ -115,8 +115,10 @@ value 2"
   run kenvx cronjob/multicontainer
   assert_output "SAMPLE_FROM_CONTAINER_1=one
 SAMPLE_FROM_CONTAINER_2=two
+SAMPLE_FROM_INIT_CONTAINER_1=one
 SAMPLE_CONTAINER_1=one
-SAMPLE_CONTAINER_2=two"
+SAMPLE_CONTAINER_2=two
+SAMPLE_INITCONTAINER_1=one"
 }
 
 @test "cronjob/multicontainer: limit ENV from container1" {
@@ -129,6 +131,12 @@ SAMPLE_CONTAINER_1=one"
   run kenvx cronjob/multicontainer -c container2
   assert_output "SAMPLE_FROM_CONTAINER_2=two
 SAMPLE_CONTAINER_2=two"
+}
+
+@test "cronjob/multicontainer: limit ENV from init-container1" {
+  run kenvx cronjob/multicontainer -c init-container1
+  assert_output "SAMPLE_FROM_INIT_CONTAINER_1=one
+SAMPLE_INITCONTAINER_1=one"
 }
 
 @test "cronjob/multicontainer: fails on limit ENV from notfound container" {
