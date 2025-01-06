@@ -8,6 +8,10 @@ JQ_DEFAULT_VERSION := 1.7.1
 KUBECTL_VERSIONS := 1.28 1.29 1.30 1.31 1.32
 JQ_VERSIONS := 1.6 1.7.1
 
+# Get CPU count and multiply by 3 for parallel tests
+NCPU := $(shell if [ "$$(uname)" = "Darwin" ]; then sysctl -n hw.ncpu; else nproc; fi)
+PARALLEL_JOBS := $(shell echo "$$(( $(NCPU) * 3 ))")
+
 ### -----------------------
 # --- Building & Testing
 ### -----------------------
@@ -15,7 +19,7 @@ JQ_VERSIONS := 1.6 1.7.1
 .PHONY: all
 all:
 	$(MAKE) build
-	$(MAKE) test
+	$(MAKE) test-matrix
 
 .PHONY: build
 build: format lint
@@ -54,7 +58,9 @@ test-version:
 		ln -s "/opt/jq/bin/jq-$(JQ_VERSION)" "$$temp_dir/jq"; \
 		ln -s "/opt/kubectl/bin/kubectl-$(KUBECTL_VERSION)" "$$temp_dir/kubectl"; \
 		PATH="$$temp_dir:$$PATH" \
-		bash -c 'kubectl version --client && jq --version && bats test' \
+		bash -c 'kubectl version --client \
+			&& jq --version \
+			&& bats test -T -j $(PARALLEL_JOBS)' \
 	)
 
 .PHONY: test-matrix
