@@ -207,6 +207,17 @@ RUN ln -s /opt/kubectl/bin/kubectl-1.32 /opt/kubectl/bin/kubectl \
     && chown -R $USERNAME:$USERNAME /opt/kubectl/bin
 ENV PATH $PATH:/opt/kubectl/bin
 
+# add all currently supported jq versions by kenvx
+# version 1.6 comes via the package manager.
+# https://github.com/jqlang/jq/releases
+RUN mkdir -p /opt/jq/bin \
+    && ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" \
+    && VERSION="1.7.1" && curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-${VERSION}/jq-linux-${ARCH}" -o "/opt/jq/bin/jq-${VERSION}" && chmod +x "/opt/jq/bin/jq-${VERSION}" \
+    && ln -s /usr/bin/jq /opt/jq/bin/jq-1.6 \
+    && ln -s /opt/jq/bin/jq-1.7.1 /opt/jq/bin/jq \
+    && chown -R $USERNAME:$USERNAME /opt/jq/bin
+ENV PATH /opt/jq/bin:$PATH
+
 # install kubectl plugins via krew
 # https://krew.sigs.k8s.io/plugins/
 # -> https://github.com/stern/stern

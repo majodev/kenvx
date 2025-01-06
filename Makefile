@@ -3,6 +3,7 @@
 ### -----------------------
 
 KUBECTL_DEFAULT_VERSION := 1.32
+JQ_DEFAULT_VERSION := 1.7.1
 
 ### -----------------------
 # --- Building & Testing
@@ -45,18 +46,28 @@ switch-kubectl:
 	@ln -s /opt/kubectl/bin/kubectl-$(VERSION) /opt/kubectl/bin/kubectl
 	@kubectl version --client
 
+.PHONY: switch-jq
+switch-jq:
+	@if [ -z "$(VERSION)" ]; then echo "VERSION is required"; exit 1; fi
+	@rm -f /opt/jq/bin/jq
+	@ln -s /opt/jq/bin/jq-$(VERSION) /opt/jq/bin/jq
+	@jq --version
+
 .PHONY: test-matrix
 test-matrix:
 	@bash test/kind_init.sh
-	@for version in 1.28 1.29 1.30 1.31 1.32; do \
-		echo "=== Testing with kubectl v$$version ==="; \
-		( \
-			trap 'make switch-kubectl VERSION=$(KUBECTL_DEFAULT_VERSION)' EXIT; \
-			$(MAKE) switch-kubectl VERSION=$$version && \
-			bats test; \
-		); \
-		test_exit=$$?; \
-		if [ $$test_exit -ne 0 ]; then exit $$test_exit; fi \
+	@for kubectl_version in 1.28 1.29 1.30 1.31 1.32; do \
+		for jq_version in 1.6 1.7.1; do \
+			echo "=== Testing with kubectl v$$kubectl_version and jq v$$jq_version ==="; \
+			( \
+				trap 'make switch-kubectl VERSION=$(KUBECTL_DEFAULT_VERSION) && make switch-jq VERSION=$(JQ_DEFAULT_VERSION)' EXIT; \
+				$(MAKE) switch-kubectl VERSION=$$kubectl_version && \
+				$(MAKE) switch-jq VERSION=$$jq_version && \
+				bats test; \
+			); \
+			test_exit=$$?; \
+			if [ $$test_exit -ne 0 ]; then exit $$test_exit; fi \
+		done \
 	done
 
 ### -----------------------
