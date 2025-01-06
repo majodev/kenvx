@@ -5,10 +5,10 @@ A bash script to extract and inject Kubernetes environment variables to local co
 - [kenvx](#kenvx)
   - [Features](#features)
   - [Requirements](#requirements)
+  - [Installation](#installation)
   - [Usage](#usage)
     - [Supported arguments](#supported-arguments)
     - [Examples](#examples)
-  - [Installation](#installation)
     - [Development setup](#development-setup)
 
 
@@ -19,14 +19,18 @@ A bash script to extract and inject Kubernetes environment variables to local co
 - Lists all environment variables from a Kubernetes resource
 - Resolves `envFrom` references (ConfigMaps and Secrets), a typical limitation of `kubectl set env --resolve --list`.
 - Supports variable overrides
-- Can execute commands with the extracted variables
-- Works with any Kubernetes resource type (Deployments, StatefulSets, CronJobs, etc.)
+- Can execute commands with the extracted variables (e.g. execute the same job locally)
+- Works with any Kubernetes resource type (Pods, Deployments, StatefulSets, CronJobs, etc.)
 
 ## Requirements
 
 `bash`, `kubectl` and `jq` must be installed.
 
 > TODO add support matrix.
+
+## Installation
+
+[https://github.com/majodev/kenvx/releases](See the latest GitHub Release).
 
 ## Usage
 
@@ -52,11 +56,8 @@ kenvx job/myapp
 kenvx cronjob/myapp
 kenvx daemonset/myapp
 
-# Print variables from specific namespace
-kenvx deployment/myapp -n prod
-
-# Print variables from specific container
-kenvx deployment/myapp -c nginx
+# Print variables from specific namespace and container
+kenvx deployment/myapp -n prod -c nginx
 
 # Override variables
 kenvx deployment/myapp DEBUG=true API_URL=http://localhost:8080
@@ -64,18 +65,11 @@ kenvx deployment/myapp DEBUG=true API_URL=http://localhost:8080
 # Run command with variables
 kenvx deployment/myapp -- env
 
-# Combined usage
-kenvx deployment/myapp -n prod -c nginx MY_VAR=local -- ./script.sh
-
 # Use with docker (e.g. to run a local container with the extracted ENV variables)
 # Note: This example uses process substitution, which is a bash feature.
 # If you are using a different shell, you can save the output of `kenvx` to a file and use `--env-file` instead.
 docker run --env-file <(kenvx deployment/postgres) -it alpine env
 ```
-
-## Installation
-
-See latest [https://github.com/majodev/kenvx/releases](GitHub Release).
 
 ### Development setup
 
