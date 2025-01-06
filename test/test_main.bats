@@ -44,6 +44,16 @@ kubectl-envx() {
   assert_output --partial "Error: Invalid argument 'INVALID'"
 }
 
+@test "displays usage on -h and --help" {
+  run kubectl-envx --help
+  assert_success
+  assert_output --partial "Usage:"
+
+  run kubectl-envx -h
+  assert_success
+  assert_output --partial "Usage:"
+}
+
 @test "deployment/noenv: prints ENV (nothing)" {
   run kubectl-envx deployment/noenv
   assert_success

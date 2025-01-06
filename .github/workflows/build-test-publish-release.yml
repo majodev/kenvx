@@ -85,22 +85,25 @@ jobs:
           # Update version in script
           sed -i "s/VERSION=\".*\"/VERSION=\"${VERSION}\"/" dist/kubectl-envx
           chmod +x dist/kubectl-envx
+          tar -czf dist/kubectl-envx.tar.gz -C dist kubectl-envx
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/kubectl-envx
+          files: dist/kubectl-envx.zip
           name: Release ${{ github.ref_name }}
           body: |
             ## kubectl-envx ${{ github.ref_name }}
             
-            Binary: `kubectl-envx`
+            Archive: `kubectl-envx.tar.gz`
             
             ### Installation
             ```bash
-            curl -Lo kubectl-envx https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/kubectl-envx
+            curl -Lo kubectl-envx.tar.gz https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/kubectl-envx.tar.gz
+            tar xzf kubectl-envx.tar.gz
             chmod +x kubectl-envx
             sudo mv kubectl-envx /usr/local/bin/
+            rm kubectl-envx.tar.gz
             ```
           draft: false
           prerelease: false

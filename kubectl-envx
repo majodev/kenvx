@@ -11,7 +11,7 @@ set -Eeo pipefail
 VERSION="0.0.0-dev" # release build pinned
 
 usage() {
-    ORIGIN_SCRIPT=$(basename "$0")
+    ORIGIN_SCRIPT="kubectl envx" # assert used as kubectl plugin is the primary usecase
 
     echo "Usage: $ORIGIN_SCRIPT <kind/name> [-n|--namespace <namespace>] [-c|--container <container>] [ENV_KEY=ENV_VALUE...] [-- command [args...]]"
     echo "Version: $VERSION"
@@ -23,7 +23,6 @@ usage() {
     echo "  $ORIGIN_SCRIPT deployment/myapp -n prod -c nginx MY_VAR=value      # Combined usage"
     echo "  $ORIGIN_SCRIPT deployment/myapp -- env                             # Run command with variables"
     echo "  $ORIGIN_SCRIPT deployment/myapp -c nginx -- env                    # Run command with container vars"
-    exit 1
 }
 
 # Initialize variables
@@ -42,6 +41,10 @@ while [[ $# -gt 0 ]]; do
     fi
 
     case $1 in
+        -h|--help)
+            usage
+            exit 0
+            ;;
         -n|--namespace)
             NAMESPACE="$2"
             shift 2
@@ -69,6 +72,7 @@ while [[ $# -gt 0 ]]; do
         *)
             echo "Error: Invalid argument '$1'"
             usage
+            exit 1
             ;;
     esac
 done
@@ -77,6 +81,7 @@ done
 if [[ -z "$RESOURCE" ]]; then
     echo "Error: Resource (kind/name) is required"
     usage
+    exit 1
 fi
 
 # Build kubectl arguments array for get commands
