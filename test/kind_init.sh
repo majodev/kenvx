@@ -8,7 +8,7 @@ if [[ $(kubectl config current-context) != "kind-kenvx" ]]; then
 fi
 
 kubectl config set-context --current --namespace default
-kubectl delete job/sample || true
-kubectl apply -f ./test/manifests/
+kubectl delete job/sample > /dev/null || true
+kubectl apply -f ./test/manifests/ > /dev/null
 
 kubectl rollout status deployment sample

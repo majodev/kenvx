@@ -26,7 +26,7 @@ A bash script to extract and inject Kubernetes environment variables to local co
 
 `bash`, `kubectl` and [`jq`](https://github.com/jqlang/jq) must be installed.
 
-The following versions of these dependencies are currently supported:
+The following versions of these dependencies are currently tested and supported:
 
 | Version      | Status |
 | ------------ | ------ |
