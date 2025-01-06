@@ -1,6 +1,5 @@
-# which kubectl version to install (should be in sync with the kubernetes version used by GKE)
 # https://hub.docker.com/r/bitnami/kubectl/tags
-FROM bitnami/kubectl:1.28 as kubectl
+FROM bitnami/kubectl:1.31 as kubectl
 
 ### -----------------------
 # --- Stage: development

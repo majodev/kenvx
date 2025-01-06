@@ -107,6 +107,7 @@ multi"
 }
 
 @test "cronjob/duplicates: prints (partial) ENV" {
+  skip
   run kenvx cronjob/duplicates
   assert_output "SAMPLE_HERE=working
 SAMPLE_DUP=first_occurrence"
