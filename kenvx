@@ -1,10 +1,20 @@
 #!/bin/bash
+
+#
+# (c) 2025-present Mario Ranftl (mranftl.com)
+# https://github.com/majodev/kenvx
+# MIT License
+#
+
 set -Eeo pipefail
+
+VERSION="0.0.0-dev" # Will be replaced during release build
 
 usage() {
     ORIGIN_SCRIPT=$(basename "$0")
 
     echo "Usage: $ORIGIN_SCRIPT <kind/name> [-n|--namespace <namespace>] [-c|--container <container>] [ENV_KEY=ENV_VALUE...] [-- command [args...]]"
+    echo "Version: $VERSION"
     echo "Examples:"
     echo "  $ORIGIN_SCRIPT deployment/myapp                                    # Print all environment variables"
     echo "  $ORIGIN_SCRIPT deployment/myapp -n prod                            # Print variables from prod namespace"
