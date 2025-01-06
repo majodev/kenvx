@@ -2,13 +2,13 @@
 
 #
 # (c) 2025-present Mario Ranftl (mranftl.com)
-# https://github.com/majodev/kenvx
+# https://github.com/majodev/kubectl-envx
 # MIT License
 #
 
 set -Eeo pipefail
 
-VERSION="0.0.0-dev" # Will be replaced during release build
+VERSION="0.0.0-dev" # release build pinned
 
 usage() {
     ORIGIN_SCRIPT=$(basename "$0")

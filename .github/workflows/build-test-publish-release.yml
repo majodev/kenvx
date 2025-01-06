@@ -30,7 +30,7 @@ jobs:
         with:
           config: .github/config/kind.yml
           version: v0.24.0
-          name: kenvx
+          name: kubectl-envx
           image: kindest/node:v1.31.4 # ensure same as in Makefile
 
       - name: setup@kubeconfig
@@ -81,26 +81,26 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           mkdir -p dist
-          cp kenvx dist/
+          cp kubectl-envx dist/
           # Update version in script
-          sed -i "s/VERSION=\".*\"/VERSION=\"${VERSION}\"/" dist/kenvx
-          chmod +x dist/kenvx
+          sed -i "s/VERSION=\".*\"/VERSION=\"${VERSION}\"/" dist/kubectl-envx
+          chmod +x dist/kubectl-envx
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/kenvx
+          files: dist/kubectl-envx
           name: Release ${{ github.ref_name }}
           body: |
-            ## kenvx ${{ github.ref_name }}
+            ## kubectl-envx ${{ github.ref_name }}
             
-            Binary: `kenvx`
+            Binary: `kubectl-envx`
             
             ### Installation
             ```bash
-            curl -Lo kenvx https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/kenvx
-            chmod +x kenvx
-            sudo mv kenvx /usr/local/bin/
+            curl -Lo kubectl-envx https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/kubectl-envx
+            chmod +x kubectl-envx
+            sudo mv kubectl-envx /usr/local/bin/
             ```
           draft: false
           prerelease: false

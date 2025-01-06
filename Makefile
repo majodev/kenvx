@@ -31,14 +31,14 @@ info:
 
 .PHONY: format
 format:
-	@shellharden --replace kenvx
+	@shellharden --replace kubectl-envx
 	@shellharden --replace test/*.bats
 
 .PHONY: lint
 lint:
-	@shellcheck -x kenvx
+	@shellcheck -x kubectl-envx
 	@shellcheck -x test/*.bats
-	@shellharden --check kenvx
+	@shellharden --check kubectl-envx
 	@shellharden --check test/*.bats
 
 .PHONY: test
@@ -81,13 +81,13 @@ test-matrix:
 
 .PHONY: kind-cluster-clean
 kind-cluster-clean:
-	kind delete cluster --name kenvx
+	kind delete cluster --name kubectl-envx
 	rm -rf .kube/**
 
 # https://hub.docker.com/r/kindest/node/tags
 .PHONY: kind-cluster-init
 kind-cluster-init:
-	kind create cluster --name kenvx --config=test/kind.yaml --kubeconfig .kube/config --image "kindest/node:v1.31.4"
+	kind create cluster --name kubectl-envx --config=test/kind.yaml --kubeconfig .kube/config --image "kindest/node:v1.31.4"
 	$(MAKE) kind-fix-kubeconfig
 	sleep 1
 	$(MAKE) kind-cluster-init-script

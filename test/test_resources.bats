@@ -5,8 +5,8 @@ setup() {
   bats_load_library bats-assert # https://github.com/bats-core/bats-assert
 }
 
-kenvx() {
-  "$PROJECT_ROOT_DIR"/kenvx "$@"
+kubectl-envx() {
+  "$PROJECT_ROOT_DIR"/kubectl-envx "$@"
 }
 
 EXPECTED_PRINT_OUTPUT=$(cat <<EOF
@@ -54,61 +54,61 @@ EXEC_PRINTF='printf "%s\n" \
   "SAMPLE_SECRET_64" "$SAMPLE_SECRET_64"'
 
 @test "deployment/sample: prints ENV" {
-  run kenvx deployment/sample
+  run kubectl-envx deployment/sample
   assert_success
   assert_output "$EXPECTED_PRINT_OUTPUT"
 }
 
 @test "deployment/sample: exec with ENV" {
-  run kenvx deployment/sample -- sh -c "$EXEC_PRINTF"
+  run kubectl-envx deployment/sample -- sh -c "$EXEC_PRINTF"
   assert_success
   assert_output "$EXPECTED_EXEC_OUTPUT"
 }
 
 @test "cronjob/sample: prints ENV" {
-  run kenvx cronjob/sample
+  run kubectl-envx cronjob/sample
   assert_success
   assert_output "$EXPECTED_PRINT_OUTPUT"
 }
 
 @test "cronjob/sample: exec with ENV" {
-  run kenvx cronjob/sample -- sh -c "$EXEC_PRINTF"
+  run kubectl-envx cronjob/sample -- sh -c "$EXEC_PRINTF"
   assert_success
   assert_output "$EXPECTED_EXEC_OUTPUT"
 }
 
 @test "job/sample: prints ENV" {
-  run kenvx job/sample
+  run kubectl-envx job/sample
   assert_success
   assert_output "$EXPECTED_PRINT_OUTPUT"
 }
 
 @test "job/sample: exec with ENV" {
-  run kenvx job/sample -- sh -c "$EXEC_PRINTF"
+  run kubectl-envx job/sample -- sh -c "$EXEC_PRINTF"
   assert_success
   assert_output "$EXPECTED_EXEC_OUTPUT"
 }
 
 @test "daemonset/sample: prints ENV" {
-  run kenvx daemonset/sample
+  run kubectl-envx daemonset/sample
   assert_success
   assert_output "$EXPECTED_PRINT_OUTPUT"
 }
 
 @test "daemonset/sample: exec with ENV" {
-  run kenvx daemonset/sample -- sh -c "$EXEC_PRINTF"
+  run kubectl-envx daemonset/sample -- sh -c "$EXEC_PRINTF"
   assert_success
   assert_output "$EXPECTED_EXEC_OUTPUT"
 }
 
 @test "pod/sample: prints ENV" {
-  run kenvx "$(kubectl get pods -n default -lapp=sample -o name | head -n 1)"
+  run kubectl-envx "$(kubectl get pods -n default -lapp=sample -o name | head -n 1)"
   assert_success
   assert_output "$EXPECTED_PRINT_OUTPUT"
 }
 
 @test "pod/sample: exec with ENV" {
-  run kenvx "$(kubectl get pods -n default -lapp=sample -o name | head -n 1)" -- sh -c "$EXEC_PRINTF"
+  run kubectl-envx "$(kubectl get pods -n default -lapp=sample -o name | head -n 1)" -- sh -c "$EXEC_PRINTF"
   assert_success
   assert_output "$EXPECTED_EXEC_OUTPUT"
 }

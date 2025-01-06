@@ -1,9 +1,9 @@
 #!/bin/bash
 set -Eeo pipefail
 
-# Exit immediately if the current kubectl context is not kind-kenvx
-if [[ $(kubectl config current-context) != "kind-kenvx" ]]; then
-  echo "Current kubectl context is not kind-kenvx"
+# Exit immediately if the current kubectl context is not kind-kubectl-envx
+if [[ $(kubectl config current-context) != "kind-kubectl-envx" ]]; then
+  echo "Current kubectl context is not kind-kubectl-envx"
   exit 1
 fi
 

@@ -47,8 +47,8 @@ services:
       - -c
       - |
         git config --global --add safe.directory /app
-        sudo ln -sf /app/kenvx /usr/local/bin/kenvx
-        chmod +x /app/kenvx
+        sudo ln -sf /app/kubectl-envx /usr/local/bin/kubectl-envx
+        chmod +x /app/kubectl-envx
         while sleep 1000; do :; done
 
 volumes:

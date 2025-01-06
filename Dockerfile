@@ -196,7 +196,7 @@ RUN set -x; KREW_TMP="$(mktemp -d)" \
     && rm -rf "${KREW_TMP}"
 ENV PATH $PATH:$KREW_ROOT/bin
 
-# add all currently supported kubectl versions by kenvx
+# add all currently supported kubectl versions by kubectl-envx
 # https://hub.docker.com/r/bitnami/kubectl/tags
 COPY --from=kubectl-1.32 /opt/bitnami/kubectl/bin/kubectl /opt/kubectl/bin/kubectl-1.32
 COPY --from=kubectl-1.31 /opt/bitnami/kubectl/bin/kubectl /opt/kubectl/bin/kubectl-1.31
@@ -207,7 +207,7 @@ RUN ln -s /opt/kubectl/bin/kubectl-1.32 /opt/kubectl/bin/kubectl \
     && chown -R $USERNAME:$USERNAME /opt/kubectl/bin
 ENV PATH $PATH:/opt/kubectl/bin
 
-# add all currently supported jq versions by kenvx
+# add all currently supported jq versions by kubectl-envx
 # version 1.6 comes via the package manager.
 # https://github.com/jqlang/jq/releases
 RUN mkdir -p /opt/jq/bin \
