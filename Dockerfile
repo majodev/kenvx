@@ -216,7 +216,6 @@ RUN mkdir -p /opt/jq/bin \
     && ln -s /usr/bin/jq /opt/jq/bin/jq-1.6 \
     && ln -s /opt/jq/bin/jq-1.7.1 /opt/jq/bin/jq \
     && chown -R $USERNAME:$USERNAME /opt/jq/bin
-ENV PATH /opt/jq/bin:$PATH
 
 # install kubectl plugins via krew
 # https://krew.sigs.k8s.io/plugins/

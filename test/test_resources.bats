@@ -6,7 +6,7 @@ setup() {
 }
 
 kenvx() {
-  bash "$PROJECT_ROOT_DIR"/kenvx "$@"
+  "$PROJECT_ROOT_DIR"/kenvx "$@"
 }
 
 EXPECTED_PRINT_OUTPUT=$(cat <<EOF

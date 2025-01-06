@@ -10,7 +10,7 @@ setup() {
 }
 
 kenvx() {
-  bash "$PROJECT_ROOT_DIR"/kenvx "$@"
+  "$PROJECT_ROOT_DIR"/kenvx "$@"
 }
 
 @test "fails on missing arguments" {
@@ -103,14 +103,20 @@ multi"
 
 @test "cronjob/invalidrefs: prints (partial) ENV" {
   run kenvx cronjob/invalidrefs
+  assert_success
   assert_output "SAMPLE_HERE=working"
 }
 
-@test "cronjob/duplicates: prints (partial) ENV" {
+@test "cronjob/duplicates: prints and exec (partial) ENV" {
   skip
   run kenvx cronjob/duplicates
+  assert_success
   assert_output "SAMPLE_HERE=working
 SAMPLE_DUP=first_occurrence"
+
+  run kenvx cronjob/duplicates -- sh -c 'env | grep SAMPLE_ | sort'
+  assert_output "SAMPLE_DUP=first_occurrence
+SAMPLE_HERE=working"
 }
 
 @test "deployment/sample2 -n default2: prints (partial) ENV" {
@@ -119,14 +125,17 @@ SAMPLE_MULTI=Multi line
 value 2"
 
   run kenvx -n default2 deployment/sample2
+  assert_success
   assert_output "$expected"
 
   run kenvx --namespace default2 deployment/sample2
+  assert_success
   assert_output "$expected"
 }
 
 @test "cronjob/multicontainer: prints all ENV from all containers" {
   run kenvx cronjob/multicontainer
+  assert_success
   assert_output "SAMPLE_FROM_CONTAINER_1=one
 SAMPLE_FROM_CONTAINER_2=two
 SAMPLE_FROM_INIT_CONTAINER_1=one
@@ -137,18 +146,21 @@ SAMPLE_INITCONTAINER_1=one"
 
 @test "cronjob/multicontainer: limit ENV from container1" {
   run kenvx cronjob/multicontainer -c container1
+  assert_success
   assert_output "SAMPLE_FROM_CONTAINER_1=one
 SAMPLE_CONTAINER_1=one"
 }
 
 @test "cronjob/multicontainer: limit ENV from container2" {
   run kenvx cronjob/multicontainer -c container2
+  assert_success
   assert_output "SAMPLE_FROM_CONTAINER_2=two
 SAMPLE_CONTAINER_2=two"
 }
 
 @test "cronjob/multicontainer: limit ENV from init-container1" {
   run kenvx cronjob/multicontainer -c init-container1
+  assert_success
   assert_output "SAMPLE_FROM_INIT_CONTAINER_1=one
 SAMPLE_INITCONTAINER_1=one"
 }
