@@ -82,15 +82,16 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/v}
           mkdir -p dist
           cp kubectl-envx dist/
+          cp LICENSE dist/
           # Update version in script
           sed -i "s/VERSION=\".*\"/VERSION=\"${VERSION}\"/" dist/kubectl-envx
           chmod +x dist/kubectl-envx
-          tar -czf dist/kubectl-envx.tar.gz -C dist kubectl-envx
+          tar -czf dist/kubectl-envx.tar.gz -C dist kubectl-envx LICENSE
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/kubectl-envx.zip
+          files: dist/kubectl-envx.tar.gz
           name: Release ${{ github.ref_name }}
           body: |
             ## kubectl-envx ${{ github.ref_name }}
