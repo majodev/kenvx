@@ -231,9 +231,5 @@ RUN echo 'source <(kubectl completion bash)' >>/home/$USERNAME/.bashrc \
 
 FROM development as builder
 WORKDIR /app
-COPY Makefile /app/Makefile
-COPY --chmod=0755 rksh /app/rksh
-RUN make modules
-RUN make tools
 COPY . /app/
 RUN make info && make lint

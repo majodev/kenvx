@@ -10,3 +10,5 @@ fi
 kubectl config set-context --current --namespace default
 kubectl delete job/sample || true
 kubectl apply -f ./test/manifests/
+
+kubectl rollout status deployment sample

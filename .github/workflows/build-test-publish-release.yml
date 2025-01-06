@@ -1,0 +1,80 @@
+name: Build & Test
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "**"
+
+env:
+  DOCKER_ENV_FILE: ".github/workflows/docker.env"
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup@kindconfig
+        run: |
+          kind_in="${{ github.workspace }}/.github/config/kind.yml.in"
+          kind_out="${{ github.workspace }}/.github/config/kind.yml"
+          hostip=$(sh .github/scripts/get-host-ip.sh)
+          sed "s/127.0.0.1/$hostip/g" $kind_in > $kind_out
+
+      - name: setup@kubernetes
+        uses: engineerd/setup-kind@v0.5.0
+        with:
+          config: .github/config/kind.yml
+          version: v0.24.0
+          name: kenvx
+          image: kindest/node:v1.31.4 # ensure same as in Makefile
+
+      - name: setup@kubeconfig
+        run: |
+          hostip=$(sh .github/scripts/get-host-ip.sh)
+          sed "s/127.0.0.1/$hostip/g" $HOME/.kube/config > ${{ github.workspace }}/kubeconfig.yml
+
+      - name: Build the Docker image
+        run: docker build --target builder --file Dockerfile --tag ${IMAGE_NAME}-builder:${GITHUB_SHA:8} .
+
+      - name: Create container
+        run: docker run -d --env-file $DOCKER_ENV_FILE --name=builder -it ${IMAGE_NAME}-builder:${GITHUB_SHA:8}
+
+      - name: make lint
+        run: docker exec builder make lint
+
+      - name: make test
+        run: docker exec builder make test
+
+      - name: Stop container
+        if: ${{ always() }}
+        run: docker stop builder
+
+      - name: Remove container
+        if: ${{ always() }}
+        run: docker rm builder
+
+  # release:
+  #   if: startsWith(github.ref, 'refs/tags/v')
+
+  #   needs:
+  #     - build-test
+  #   permissions:
+  #     contents: write
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+
+  #     - name: Configure Git
+  #       run: |
+  #         git config user.name "$GITHUB_ACTOR"
+  #         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+  #     # TODO add tagged github release an bake version number into script.
