@@ -1,5 +1,9 @@
 # https://hub.docker.com/r/bitnami/kubectl/tags
-FROM bitnami/kubectl:1.31 as kubectl
+FROM bitnami/kubectl:1.32 as kubectl-1.32
+FROM bitnami/kubectl:1.31 as kubectl-1.31
+FROM bitnami/kubectl:1.30 as kubectl-1.30
+FROM bitnami/kubectl:1.29 as kubectl-1.29
+FROM bitnami/kubectl:1.28 as kubectl-1.28
 
 ### -----------------------
 # --- Stage: development
@@ -93,9 +97,6 @@ RUN mkdir -p /tmp/watchexec \
     && tar xf watchexec-1.25.1-$(arch)-unknown-linux-musl.tar.xz \
     && cp watchexec-1.25.1-$(arch)-unknown-linux-musl/watchexec /usr/local/bin/watchexec \
     && rm -rf /tmp/watchexec
-
-# https://hub.docker.com/r/bitnami/kubectl/tags
-COPY --from=kubectl /opt/bitnami/kubectl/bin/kubectl /usr/local/bin/kubectl
 
 # https://helm.sh/docs/intro/install/
 RUN set -x; HELM_TMP="$(mktemp -d)" \
@@ -194,6 +195,17 @@ RUN set -x; KREW_TMP="$(mktemp -d)" \
     && ./"${KREW}" install krew \
     && rm -rf "${KREW_TMP}"
 ENV PATH $PATH:$KREW_ROOT/bin
+
+# add all currently supported kubectl versions by kenvx
+# https://hub.docker.com/r/bitnami/kubectl/tags
+COPY --from=kubectl-1.32 /opt/bitnami/kubectl/bin/kubectl /opt/kubectl/bin/kubectl-1.32
+COPY --from=kubectl-1.31 /opt/bitnami/kubectl/bin/kubectl /opt/kubectl/bin/kubectl-1.31
+COPY --from=kubectl-1.30 /opt/bitnami/kubectl/bin/kubectl /opt/kubectl/bin/kubectl-1.30
+COPY --from=kubectl-1.29 /opt/bitnami/kubectl/bin/kubectl /opt/kubectl/bin/kubectl-1.29
+COPY --from=kubectl-1.28 /opt/bitnami/kubectl/bin/kubectl /opt/kubectl/bin/kubectl-1.28
+RUN ln -s /opt/kubectl/bin/kubectl-1.32 /opt/kubectl/bin/kubectl \
+    && chown -R $USERNAME:$USERNAME /opt/kubectl/bin
+ENV PATH $PATH:/opt/kubectl/bin
 
 # install kubectl plugins via krew
 # https://krew.sigs.k8s.io/plugins/

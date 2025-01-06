@@ -47,8 +47,8 @@ jobs:
       - name: make lint
         run: docker exec builder make lint
 
-      - name: make test
-        run: docker exec builder make test
+      - name: make test-matrix
+        run: docker exec builder make test-matrix
 
       - name: Stop container
         if: ${{ always() }}

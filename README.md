@@ -26,7 +26,15 @@ A bash script to extract and inject Kubernetes environment variables to local co
 
 `bash`, `kubectl` and `jq` must be installed.
 
-> TODO add support matrix.
+The following versions of these dependencies are currently supported:
+
+| Version      | Status |
+| ------------ | ------ |
+| kubectl 1.32 | ✅      |
+| kubectl 1.31 | ✅      |
+| kubectl 1.30 | ✅      |
+| kubectl 1.29 | ✅      |
+| kubectl 1.28 | ✅      |
 
 ## Installation
 
@@ -90,6 +98,9 @@ development@da38d91ede55:/app$ k get nodes
 
 # Runs lint and tests
 development@20c533ecf4c7:/app$ make
+
+# Runs tests for all supported dependencies (kubectl 1.xx)
+development@20c533ecf4c7:/app$ make test-matrix
 
 # Run a command with the extracted environment variables from deployment/sample (see test/manifests/sample.deployment.yml)
 development@da38d91ede55:/app$ kenvx deployment/sample -n default -- sh -c 'echo "# $SAMPLE_SINGLE"'

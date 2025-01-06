@@ -1,4 +1,10 @@
 ### -----------------------
+# --- Variables
+### -----------------------
+
+KUBECTL_DEFAULT_VERSION := 1.32
+
+### -----------------------
 # --- Building & Testing
 ### -----------------------
 
@@ -31,6 +37,27 @@ lint:
 test:
 	@bash test/kind_init.sh
 	@bats test
+
+.PHONY: switch-kubectl
+switch-kubectl:
+	@if [ -z "$(VERSION)" ]; then echo "VERSION is required"; exit 1; fi
+	@rm -f /opt/kubectl/bin/kubectl
+	@ln -s /opt/kubectl/bin/kubectl-$(VERSION) /opt/kubectl/bin/kubectl
+	@kubectl version --client
+
+.PHONY: test-matrix
+test-matrix:
+	@bash test/kind_init.sh
+	@for version in 1.28 1.29 1.30 1.31 1.32; do \
+		echo "=== Testing with kubectl v$$version ==="; \
+		( \
+			trap 'make switch-kubectl VERSION=$(KUBECTL_DEFAULT_VERSION)' EXIT; \
+			$(MAKE) switch-kubectl VERSION=$$version && \
+			bats test; \
+		); \
+		test_exit=$$?; \
+		if [ $$test_exit -ne 0 ]; then exit $$test_exit; fi \
+	done
 
 ### -----------------------
 # --- Kind
