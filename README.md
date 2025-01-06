@@ -30,7 +30,7 @@ A bash script to extract and inject Kubernetes environment variables to local co
 
 ## Installation
 
-[https://github.com/majodev/kenvx/releases](See the latest GitHub Release).
+See the latest [GitHub Release](https://github.com/majodev/kenvx/releases).
 
 ## Usage
 
