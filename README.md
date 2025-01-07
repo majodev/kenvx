@@ -37,7 +37,13 @@ The following versions of these dependencies are currently tested and supported:
 
 ## Installation
 
-See the latest [GitHub Release](https://github.com/majodev/kubectl-envx/releases).
+Easiest way to install is via the `kubectl` plugin manager [krew](https://krew.sigs.k8s.io/docs/user-guide/quickstart/):
+
+```bash
+kubectl krew install envx
+```
+
+For standalone installation, see the latest [GitHub Release](https://github.com/majodev/kubectl-envx/releases).
 
 ## Usage
 
